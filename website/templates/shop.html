@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="shop-container">
+    <h1 style="text-align: center; margin-bottom: 1rem; font-family: 'Orbitron'; font-size: 3rem;">PRODUCT <span
+            style="color: var(--neon-blue)">CATALOG</span></h1>
+
+    <!-- Filter Mock Links -->
+    <div style="text-align: center; margin-bottom: 3rem;">
+        <a href="{{ url_for('shop') }}"
+            style="color: white; margin: 0 1rem; text-decoration: none; border-bottom: 1px solid var(--neon-blue);">ALL</a>
+        <a href="{{ url_for('shop', category='Processors') }}"
+            style="color: #aaa; margin: 0 1rem; text-decoration: none;">PROCESSORS</a>
+        <a href="{{ url_for('shop', category='Implants') }}"
+            style="color: #aaa; margin: 0 1rem; text-decoration: none;">IMPLANTS</a>
+        <a href="{{ url_for('shop', category='Gadgets') }}"
+            style="color: #aaa; margin: 0 1rem; text-decoration: none;">GADGETS</a>
+        <a href="{{ url_for('shop', category='Energy') }}"
+            style="color: #aaa; margin: 0 1rem; text-decoration: none;">ENERGY</a>
+    </div>
+
+    {% if search_query %}
+    <p style="text-align: center; margin-bottom: 2rem; color: #888;">Showing results for: "{{ search_query }}"</p>
+    {% endif %}
+
+    <div class="product-grid">
+        {% for product in products %}
+        <div class="product-card">
+            <div class="product-img">
+                <img src="{{ url_for('static', filename='img/' + product.img) }}" alt="{{ product.name }}"
+                    style="max-width: 70%; filter: drop-shadow(0 0 10px rgba(255,255,255,0.5));">
+            </div>
+            <div class="product-info">
+                <h3>{{ product.name }}</h3>
+                <span class="product-price">¥{{ product.price }}</span>
+                <a href="{{ url_for('product_detail', product_id=product.id) }}" class="buy-btn"
+                    style="display:block; text-align:center; text-decoration:none;">INSPECT</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if not products %}
+    <div style="text-align: center; padding: 4rem;">
+        <h2>NO SIGNAL FOUND</h2>
+        <p>Adjust your search parameters.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

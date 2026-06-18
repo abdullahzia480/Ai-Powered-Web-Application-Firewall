@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="product-detail-container">
+    <div class="detail-img">
+        <img src="{{ url_for('static', filename='img/' + product.img) }}" alt="{{ product.name }}">
+    </div>
+    <div class="detail-info">
+        <h1 class="detail-title">{{ product.name }}</h1>
+        <div class="detail-price">¥{{ product.price }}</div>
+
+        <div style="margin-bottom: 2rem;">
+            <span
+                style="background: rgba(0, 243, 255, 0.1); color: var(--neon-blue); padding: 0.5rem; border: 1px solid var(--neon-blue);">
+                {{ product.category }}
+            </span>
+            <span style="margin-left: 1rem; color: #ffeb3b;">★ {{ product.rating }}</span>
+        </div>
+
+        <p class="detail-desc">{{ product.desc }}</p>
+
+        <button class="cta-btn" onclick="alert('Added to neural cart!')" style="width: 100%;">ADD TO CIRCUIT</button>
+
+        <!-- VULNERABLE REVIEWS SECTION -->
+        <div class="reviews-section">
+            <h3 style="font-family: 'Orbitron'; margin-bottom: 1.5rem;">USER LOGS</h3>
+
+            <form action="/review" method="POST" class="contact-form">
+                <textarea name="comment"
+                    placeholder="Write a review... (Hint: Try <script>alert(1)</script>)"></textarea>
+                <button type="submit" class="btn-login"
+                    style="width: 100%; border: 1px solid var(--neon-blue); background: transparent; color: var(--neon-blue); cursor: pointer;">TRANSMIT
+                    REVIEW</button>
+            </form>
+
+            <div style="margin-top: 2rem;">
+                <div class="review-card">
+                    <strong>NetRunner_99</strong> says:
+                    <p>Overclocked my nervous system by 40%. Worth the credits.</p>
+                </div>
+                <div class="review-card">
+                    <strong>CyberPunk_X</strong> says:
+                    <p>Good hardware, but the installation was painful.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

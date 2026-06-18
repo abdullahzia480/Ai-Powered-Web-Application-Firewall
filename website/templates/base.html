@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYBERSHOP | The Future is Now</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/store.css') }}">
+    <style>
+        /* Flash Messages */
+        .flash-messages {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .flash {
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid var(--neon-blue);
+            padding: 1rem;
+            margin-bottom: 10px;
+            box-shadow: 0 0 10px var(--neon-blue);
+            animation: slideIn 0.3s ease-out;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="logo">CYBERSHOP</div>
+        <div class="nav-links" style="display: flex; align-items: center;">
+            <a href="{{ url_for('index') }}" class="{{ 'active' if request.endpoint == 'index' }}">Home</a>
+            <a href="{{ url_for('shop') }}" class="{{ 'active' if request.endpoint == 'shop' }}">Hardware</a>
+            <a href="{{ url_for('contact') }}" class="{{ 'active' if request.endpoint == 'contact' }}">Contact</a>
+
+            {% if session.user %}
+            <a href="{{ url_for('profile') }}" class="{{ 'active' if request.endpoint == 'profile' }}">Profile</a>
+            <a href="{{ url_for('logout') }}" style="color: var(--neon-purple);">LOGOUT</a>
+            {% else %}
+            <a href="{{ url_for('login') }}" class="btn-login">Admin Portal</a>
+            {% endif %}
+
+            <!-- VULNERABLE SEARCH BAR -->
+            <!-- Vulnerable to XSS: The previous developer put raw input back into the value (fixed logic in app.py but form remains basic) -->
+            <form action="{{ url_for('search') }}" method="GET" style="display: inline;">
+                <input type="text" name="q" class="nav-search" placeholder="Search..." autocomplete="off"
+                    value="{{ search_query if search_query else '' }}">
+            </form>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    {% block content %}
+    {% endblock %}
+
+    <!-- Footer -->
+    <footer style="background: #02020a; border-top: 1px solid #222; padding: 4rem 2rem; margin-top: auto;">
+        <h3>Join the Network</h3>
+        <p style="margin: 1rem 0; color: #666;">Subscribe to receive quantum encryption keys.</p>
+
+        <!-- VULNERABLE NEWSLETTER FORM -->
+        <form action="{{ url_for('newsletter') }}" method="POST"
+            style="max-width: 400px; margin: 0 auto; display: flex; gap: 10px;">
+            <input type="text" name="email" placeholder="Enter your email address" class="nav-search"
+                style="width: 100%; margin: 0;" autocomplete="off">
+            <button type="submit" class="btn-login"
+                style="background: var(--neon-blue); color: black !important; border:none; cursor: pointer;">CONNECT</button>
+        </form>
+        <p style="margin-top: 3rem; color: #444;">&copy; 2077 CyberShop International. All systems nominal.</p>
+    </footer>
+
+</body>
+
+</html>

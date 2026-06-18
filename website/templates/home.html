@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="hero">
+    <h1>Upgrade Your<br><span style="color: var(--neon-blue)">Reality</span></h1>
+    <p>Premium Cybernetic Enhancements & Quantum Processors</p>
+    <a href="{{ url_for('shop') }}" class="cta-btn">Initialize Shop</a>
+</div>
+
+<div class="features">
+    <div class="feature-card">
+        <h3>Neural Linking</h3>
+        <p>Direct brain-to-machine interfaces with zero latency.</p>
+    </div>
+    <div class="feature-card">
+        <h3>Quantum Security</h3>
+        <p>Unbreakable encryption for your digital soul.</p>
+    </div>
+    <div class="feature-card">
+        <h3>Fusion Power</h3>
+        <p>Infinite energy cells for extended operations.</p>
+    </div>
+</div>
+
+<div style="background: #02020a; padding: 4rem;">
+    <h2 style="text-align: center; margin-bottom: 3rem; font-family: 'Orbitron'; font-size: 2.5rem;">TRENDING <span
+            style="color: var(--neon-purple)">UPGRADES</span></h2>
+    <div class="product-grid" style="max-width: 1200px; margin: 0 auto;">
+        {% for product in featured %}
+        <div class="product-card">
+            <div class="product-img">
+                <img src="{{ url_for('static', filename='img/' + product.img) }}" alt="{{ product.name }}"
+                    style="max-width: 70%; filter: drop-shadow(0 0 10px rgba(255,255,255,0.5));">
+            </div>
+            <div class="product-info">
+                <h3>{{ product.name }}</h3>
+                <span class="product-price">¥{{ product.price }}</span>
+                <p style="color: #888; margin-bottom: 1rem; font-size: 0.9rem;">{{ product.desc[:60] }}...</p>
+                <a href="{{ url_for('product_detail', product_id=product.id) }}" class="buy-btn"
+                    style="display:block; text-align:center; text-decoration:none;">VIEW SPECS</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

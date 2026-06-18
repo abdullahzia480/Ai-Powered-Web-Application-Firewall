@@ -1,0 +1,522 @@
+═══════════════════════════════════════════════════════════════════════════════
+                    SENTINAI - AI-POWERED WEB APPLICATION FIREWALL
+                          Complete Project Documentation
+═══════════════════════════════════════════════════════════════════════════════
+
+PROJECT OVERVIEW
+────────────────────────────────────────────────────────────────────────────────
+SentinAI is a demonstration of an AI-powered Web Application Firewall (WAF) 
+that protects web applications from SQL Injection and other malicious attacks 
+in real-time using Machine Learning.
+
+Key Features:
+- Real-time AI threat detection using Scikit-learn
+- Live traffic monitoring with professional dashboard
+- Instant Telegram alerts for blocked attacks
+- Portable WAF package that can protect any Flask application
+- Mock E-Commerce website for demonstration
+- Enterprise-grade UI with real-time analytics
+
+
+PROJECT ARCHITECTURE
+────────────────────────────────────────────────────────────────────────────────
+
+The project is split into TWO main packages:
+
+1. waftool/ - The Portable WAF Package
+   ├── ai_engine.py         - Machine Learning threat detection
+   ├── alerts.py            - Telegram notification system
+   ├── middleware.py        - Flask extension (core WAF logic)
+   ├── model_trainer.py     - ML model training script
+   ├── firewall_model.pkl   - Trained ML model
+   ├── dataset.csv          - Training data (basic)
+   ├── sqli-extended.csv    - Extended SQLi training dataset
+   ├── static/
+   │   ├── css/style.css    - Dashboard styling
+   │   └── js/dashboard.js  - Dashboard real-time updates
+   └── templates/
+       ├── dashboard.html   - WAF Control Center UI
+       └── blocked.html     - Attack blocked page
+
+2. website/ - Mock E-Commerce Application
+   ├── app.py               - Vulnerable Flask app to protect
+   ├── static/
+   │   ├── css/store.css    - CyberShop theme
+   │   └── img/             - Product images (AI-generated)
+   └── templates/
+       ├── home.html        - Store homepage
+       ├── shop.html        - Product catalog
+       └── login.html       - Vulnerable admin login
+
+3. Root Level
+   ├── run_system.py        - Main entry point (integrates WAF + Website)
+   └── requirements.txt     - Python dependencies
+
+
+HOW IT WORKS
+────────────────────────────────────────────────────────────────────────────────
+
+Step 1: Model Training
+----------------------
+- The AI model was trained on 'sqli-extended.csv' (50MB+ of attack patterns)
+- Uses TF-IDF vectorization to convert text to numerical features
+- Logistic Regression classifier identifies malicious patterns
+- Saved as 'firewall_model.pkl' for real-time inference
+
+Step 2: Request Interception
+-----------------------------
+When a user visits the E-Commerce site:
+1. Flask receives the HTTP request
+2. SentinAIFirewall's 'before_request' hook intercepts it
+3. Extracts all form data and URL parameters
+4. Combines them into a payload string
+
+Step 3: AI Analysis
+-------------------
+- The payload is sent to AIEngine.predict()
+- The ML model calculates a risk score (0.0 to 1.0)
+- If score > threshold (e.g., 0.5), it's flagged as malicious
+- Returns verdict: SAFE or BLOCKED
+
+Step 4: Action
+--------------
+If BLOCKED:
+- User is redirected to blocked.html
+- Telegram alert is sent (if configured)
+- Attack details are logged
+
+If SAFE:
+- Request proceeds normally
+- Traffic is logged for monitoring
+
+Step 5: Dashboard Monitoring
+-----------------------------
+- All traffic is stored in memory (self.traffic_logs)
+- Dashboard fetches data via /waf/api/logs and /waf/api/stats
+- Real-time charts update every 2 seconds
+- Shows: Total requests, Blocked threats, Live logs, Traffic graphs
+
+
+DETAILED FILE BREAKDOWN
+────────────────────────────────────────────────────────────────────────────────
+
+waftool/ai_engine.py
+--------------------
+Purpose: Load the trained ML model and perform threat detection
+Key Function: predict(text) -> (is_malicious: bool, score: float)
+Tech: Scikit-learn (TfidfVectorizer + LogisticRegression)
+
+waftool/alerts.py
+-----------------
+Purpose: Send Telegram notifications when attacks are blocked
+Key Function: send_telegram_alert(payload, ip)
+Configuration: Requires TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID
+
+waftool/middleware.py (THE CORE)
+---------------------------------
+Purpose: Flask extension that wraps any Flask app with WAF protection
+Key Class: SentinAIFirewall
+Key Methods:
+- __init__(app): Initialize and attach to Flask app
+- init_app(app): Register blueprint and hooks
+- inspect_traffic(): Intercept every request before routing
+- log_event(): Store traffic data for dashboard
+- dashboard_view(): Serve the control center UI
+- get_logs(), get_stats(): API endpoints for dashboard
+
+How it integrates:
+```python
+from waftool import SentinAIFirewall
+app = create_app()  # Your Flask app
+firewall = SentinAIFirewall(app)  # Now protected!
+```
+
+waftool/model_trainer.py
+-------------------------
+Purpose: Train the AI model on attack datasets
+How to use:
+1. Prepare dataset (CSV with 'Sentence' and 'Label' columns)
+2. Run: python -m waftool.model_trainer
+3. Generates: firewall_model.pkl
+
+waftool/templates/dashboard.html
+---------------------------------
+Purpose: Professional WAF Control Center UI
+Features:
+- 4 Colored stat cards (Total, Inspected, Allowed, Blocked)
+- Sparkline charts showing recent activity
+- Stacked bar chart of traffic volume
+- Threat analysis line chart
+- Live interception feed (raw server logs)
+Design: Clean, modern, light theme with colored accents
+
+waftool/static/js/dashboard.js
+-------------------------------
+Purpose: Real-time dashboard updates
+How it works:
+- Fetches /waf/api/logs and /waf/api/stats every 2 seconds
+- Calculates traffic deltas (new requests since last check)
+- Updates Chart.js visualizations
+- Displays logs in terminal-style format
+Tech: Vanilla JS + Chart.js
+
+website/app.py
+--------------
+Purpose: Mock E-Commerce application with INTENTIONAL vulnerabilities
+Routes:
+- GET  /           - Homepage
+- GET  /shop       - Product catalog
+- GET  /search     - Search (vulnerable to XSS/SQLi)
+- POST /newsletter - Email signup (vulnerable)
+- GET  /login      - Admin portal (vulnerable to SQLi)
+- POST /login      - Authentication check (vulnerable)
+- GET  /dashboard  - Admin page (post-login)
+
+Vulnerabilities:
+The login accepts: username = "admin' OR 1=1 --"
+This is INTENTIONAL for demonstrating the WAF!
+
+website/templates/
+------------------
+home.html:  Cyberpunk-themed homepage with hero section
+shop.html:  Product grid with real AI-generated images
+login.html: Glassmorphism admin portal
+
+website/static/css/store.css
+-----------------------------
+Purpose: Premium "CyberShop" theme
+Features:
+- Dark mode with neon accents
+- Google Fonts (Orbitron, Rajdhani)
+- Glassmorphism cards
+- Animated hero section with grid background
+- Hover effects and micro-animations
+
+run_system.py
+-------------
+Purpose: Main entry point that ties everything together
+What it does:
+1. Imports the E-Commerce app from website/
+2. Imports the WAF from waftool/
+3. Attaches the WAF to the app
+4. Starts the Flask server
+
+Usage: python run_system.py
+
+
+SETUP INSTRUCTIONS
+────────────────────────────────────────────────────────────────────────────────
+
+1. Install Dependencies
+   --------------------
+   pip install -r requirements.txt
+
+   Required packages:
+   - Flask (web framework)
+   - scikit-learn (machine learning)
+   - numpy, pandas (data processing)
+   - requests (HTTP for Telegram)
+
+2. Configure Telegram (Optional)
+   ------------------------------
+   Edit waftool/alerts.py:
+   - Replace "YOUR_BOT_TOKEN_HERE" with your Telegram bot token
+   - Replace "YOUR_CHAT_ID_HERE" with your chat ID
+   
+   How to get these:
+   a) Create a bot: Talk to @BotFather on Telegram
+   b) Get Chat ID: Talk to @userinfobot
+
+3. Train the Model (Already Done)
+   -------------------------------
+   The model is pre-trained, but to retrain:
+   python -m waftool.model_trainer
+
+4. Run the System
+   ---------------
+   python run_system.py
+
+5. Access the Application
+   -----------------------
+   - E-Commerce Store: http://localhost:5000/
+   - Product Catalog:  http://localhost:5000/shop
+   - Admin Login:      http://localhost:5000/login
+   - WAF Dashboard:    http://localhost:5000/waf/dashboard
+
+
+USAGE GUIDE
+────────────────────────────────────────────────────────────────────────────────
+
+Scenario 1: Normal User (Shopping)
+-----------------------------------
+1. Go to http://localhost:5000/
+2. Click "Initialize Shop"
+3. Browse products
+4. Click "Add to Circuit" buttons
+5. Try the search bar at the top
+
+Result: All requests are logged as [SAFE] in the dashboard
+
+Scenario 2: Admin Login (Legitimate)
+-------------------------------------
+1. Go to http://localhost:5000/login
+2. Enter:
+   Username: admin
+   Password: password123
+3. Click "Authenticate"
+
+Result: Login successful, redirected to dashboard
+
+Scenario 3: SQL Injection Attack (Blocked)
+-------------------------------------------
+1. Go to http://localhost:5000/login
+2. Enter:
+   Username: admin' OR 1=1 --
+   Password: anything
+3. Click "Authenticate"
+
+Result: 
+- Redirected to blocked.html
+- See attack details on screen
+- Receive Telegram alert (if configured)
+- Attack logged in WAF dashboard
+
+Scenario 4: Monitoring (Dashboard)
+-----------------------------------
+1. Go to http://localhost:5000/waf/dashboard
+2. Observe:
+   - Total Requests counter
+   - Blocked Threats counter
+   - Sparkline charts showing activity
+   - Stacked bar chart of traffic
+   - Live interception feed
+
+What you'll see in the log feed:
+[SAFE] 2026-01-02 19:05:30 127.0.0.1 GET /shop - 5000 - Mozilla/5.0... - 200 0.00
+[BLOCKED] 2026-01-02 19:06:15 127.0.0.1 POST /login - 5000 - Mozilla/5.0... - 403 0.98
+
+
+TECHNICAL DETAILS
+────────────────────────────────────────────────────────────────────────────────
+
+Machine Learning Model
+----------------------
+Algorithm: Logistic Regression
+Feature Extraction: TF-IDF (Term Frequency-Inverse Document Frequency)
+Training Data: 50MB+ of SQL injection patterns
+Accuracy: ~98% (on training set)
+
+Why Logistic Regression?
+- Fast inference (< 1ms per request)
+- Low memory footprint
+- Excellent for text classification
+- Probabilistic output (risk scores)
+
+Flask Blueprint Architecture
+----------------------------
+The WAF uses Flask's Blueprint system to:
+- Isolate its routes (/waf/dashboard, /waf/api/*)
+- Serve its own static files (/waf/static/)
+- Serve its own templates
+- Avoid conflicts with the protected application
+
+before_request Hook
+--------------------
+Flask's 'before_request' decorator runs BEFORE route handlers:
+@app.before_request
+def inspect_traffic():
+    # This runs for EVERY request
+    # Can block requests by returning a Response
+    # Returning None lets the request proceed
+
+This is how the WAF intercepts ALL traffic!
+
+Real-time Dashboard
+-------------------
+Tech Stack:
+- Frontend: Vanilla JavaScript + Chart.js
+- Backend: Flask JSON API
+- Update Frequency: 2 seconds
+- Data Flow:
+  1. Browser -> GET /waf/api/logs
+  2. Flask -> Returns JSON array of recent logs
+  3. Browser -> Renders logs + updates charts
+  4. Repeat every 2s
+
+Chart Types Used:
+- Sparklines: Line charts showing mini trends
+- Stacked Bar: Traffic breakdown (Allowed vs Blocked)
+- Line Chart: Threat analysis over time
+
+
+PROJECT STATISTICS
+────────────────────────────────────────────────────────────────────────────────
+
+Code Files:        15
+Python Files:      6
+HTML Templates:    6
+CSS Files:         2
+JavaScript Files:  1
+Total Lines:       ~2,500
+Training Data:     50MB (sqli-extended.csv)
+Model Size:        109MB (firewall_model.pkl)
+Dependencies:      5 Python packages
+
+
+CUSTOMIZATION GUIDE
+────────────────────────────────────────────────────────────────────────────────
+
+To Protect Your Own Flask App:
+-------------------------------
+1. Copy the waftool/ folder to your project
+2. In your main app file:
+   ```python
+   from waftool import SentinAIFirewall
+   
+   app = Flask(__name__)
+   # ... your routes ...
+   
+   firewall = SentinAIFirewall(app)  # Add this line!
+   
+   app.run()
+   ```
+3. Done! Your app is now protected.
+
+To Train on Your Own Data:
+---------------------------
+1. Create a CSV file: dataset.csv
+2. Format: Two columns: 'Sentence' (text) and 'Label' (0 or 1)
+   - 0 = Safe/Benign
+   - 1 = Malicious
+3. Update waftool/model_trainer.py line 8:
+   df = pd.read_csv('your_dataset.csv')
+4. Run: python -m waftool.model_trainer
+
+To Customize the Dashboard:
+----------------------------
+Edit waftool/templates/dashboard.html
+- Change colors in the <style> section
+- Modify chart configurations in dashboard.js
+- Add new stat cards by duplicating existing ones
+
+To Add More Attack Types:
+--------------------------
+1. Extend the training data with new attack patterns
+2. Retrain the model
+3. Adjust the threshold in middleware.py if needed
+
+
+SECURITY CONSIDERATIONS
+────────────────────────────────────────────────────────────────────────────────
+
+IMPORTANT: This is a DEMONSTRATION project for educational purposes!
+
+Production Deployment Considerations:
+1. Model Limitations:
+   - Only trained on SQL injection patterns
+   - May have false positives/negatives
+   - Needs continuous retraining with new attack patterns
+
+2. Data Storage:
+   - Logs are stored in MEMORY (lost on restart)
+   - For production: Use a database (PostgreSQL, MongoDB)
+
+3. Telegram Alerts:
+   - Bot tokens should be in environment variables
+   - Never commit credentials to version control
+
+4. Performance:
+   - In-memory storage limited to 50 logs
+   - For high traffic: Implement log rotation/archiving
+   - Consider Redis for distributed deployments
+
+5. Bypass Protection:
+   - /waf/* routes are excluded from inspection
+   - /static/* routes are excluded
+   - This is INTENTIONAL to avoid blocking dashboard access
+
+
+TROUBLESHOOTING
+────────────────────────────────────────────────────────────────────────────────
+
+Issue: Dashboard shows "Error loading logs"
+Solution: Check browser console for errors. Likely a JSON serialization issue.
+
+Issue: Model not detecting attacks
+Solution: 
+1. Check if firewall_model.pkl exists
+2. Verify the attack string is actually malicious
+3. Try lowering the threshold in ai_engine.py
+
+Issue: Telegram alerts not working
+Solution:
+1. Verify bot token and chat ID are correct
+2. Check if the bot is blocked
+3. Test the URL manually in a browser
+
+Issue: Dashboard stats not updating
+Solution:
+1. Check if Flask server is running
+2. Open browser console for JavaScript errors
+3. Verify /waf/api/stats returns valid JSON
+
+Issue: Charts growing/overlapping
+Solution: Already fixed! Charts use fixed dimensions with max-height constraints.
+
+
+FUTURE ENHANCEMENTS
+────────────────────────────────────────────────────────────────────────────────
+
+Potential Improvements:
+1. Add XSS detection (currently only SQLi)
+2. Implement rate limiting
+3. Add IP-based blocking/whitelisting
+4. Persistent database for logs
+5. User authentication for dashboard
+6. Export logs to CSV/JSON
+7. Advanced analytics (attack trends, heatmaps)
+8. Email alerts in addition to Telegram
+9. Multi-factor authentication
+10. Integration with SIEM systems
+
+
+CREDITS & TECHNOLOGIES
+────────────────────────────────────────────────────────────────────────────────
+
+Technologies Used:
+- Python 3.11
+- Flask (Web Framework)
+- Scikit-learn (Machine Learning)
+- Chart.js (Data Visualization)
+- Google Fonts (Typography)
+
+AI Model:
+- Trained on publicly available SQLi datasets
+- Algorithm: Logistic Regression with TF-IDF
+
+UI Design Inspiration:
+- Modern enterprise WAF dashboards
+- Cybersecurity control centers
+- Minimalist data visualization
+
+
+CONCLUSION
+────────────────────────────────────────────────────────────────────────────────
+
+SentinAI demonstrates how AI can be integrated into web security to provide 
+real-time threat detection and monitoring. While this is a simplified version,
+it showcases the core concepts used in production-grade WAF systems.
+
+The project successfully combines:
+✓ Machine Learning for automated threat detection
+✓ Flask middleware for seamless integration
+✓ Real-time monitoring with professional UI
+✓ Modular architecture for reusability
+✓ Educational value for understanding web security
+
+For questions or improvements, refer to the code comments and Flask/Scikit-learn
+documentation.
+
+═══════════════════════════════════════════════════════════════════════════════
+                            END OF DOCUMENTATION
+═══════════════════════════════════════════════════════════════════════════════

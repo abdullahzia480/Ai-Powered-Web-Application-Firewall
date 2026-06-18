@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="contact-container">
+    <h1 style="font-family: 'Orbitron'; font-size: 3rem; margin-bottom: 1rem;">SECURE <span
+            style="color: var(--neon-blue)">CHANNEL</span></h1>
+    <p style="margin-bottom: 3rem; color: #aaa;">Encrypted transmission to CyberShop HQ.</p>
+
+    <form action="/contact" method="POST" class="contact-form" style="text-align: left;">
+        <label style="display: block; margin-bottom: 0.5rem;">ENCRYPTION KEY (SUBJECT)</label>
+        <input type="text" name="subject" class="login-input" placeholder="Subject...">
+
+        <label style="display: block; margin-bottom: 0.5rem;">PAYLOAD (MESSAGE)</label>
+        <textarea name="message" placeholder="Type your message here..."></textarea>
+
+        <button type="submit" class="cta-btn" style="width: 100%;">TRANSMIT</button>
+    </form>
+</div>
+{% endblock %}

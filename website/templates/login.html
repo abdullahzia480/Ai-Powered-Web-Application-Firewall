@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="login-body" style="background: none; min-height: 80vh; padding-top: 4rem;">
+    <div class="login-glass">
+        <h2>IDENTIFICATION <span style="color: var(--neon-purple)">REQUIRED</span></h2>
+
+        <form action="/login" method="POST">
+            <input type="text" name="username" class="login-input" placeholder="USERNAME" autocomplete="off">
+            <input type="password" name="password" class="login-input" placeholder="PASSWORD">
+
+            <button type="submit" class="login-submit">AUTHENTICATE</button>
+        </form>
+
+        {% if error %}
+        <p style="color: #ff4444; margin-top: 1rem; font-weight: bold;">{{ error }}</p>
+        {% endif %}
+
+        <p style="margin-top: 2rem; color: #666; font-size: 0.9rem;">
+            Hint: Use <strong>admin</strong> / <strong>password123</strong><br>
+            Or try SQL Injection: <code>admin' OR 1=1 --</code>
+        </p>
+    </div>
+</div>
+{% endblock %}
