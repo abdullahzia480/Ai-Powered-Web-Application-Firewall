@@ -1,7 +1,7 @@
 import requests
 
-TELEGRAM_BOT_TOKEN = "7081128195:AAHqLP88FQr_RheuaMnJVzfi8i6rm_XDvNc" 
-TELEGRAM_CHAT_ID = "6780115616"
+TELEGRAM_BOT_TOKEN = "YOUR_TELEGRAM_BOT_TOKEN" 
+TELEGRAM_CHAT_ID = "YOUR_TELEGRAM_CHAT_ID"
 
 def test_alert():
     print(f"Testing Telegram Alert...")
