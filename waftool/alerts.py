@@ -4,8 +4,8 @@ import threading
 
 # Configuration - REPLACE THESE WITH YOUR REAL CREDENTIALS
 # For now, we will use placeholders or you can set them via environment variables
-TELEGRAM_BOT_TOKEN = "7081128195:AAHqLP88FQr_RheuaMnJVzfi8i6rm_XDvNc" 
-TELEGRAM_CHAT_ID = "6780115616"
+TELEGRAM_BOT_TOKEN = "TELEGRAM_BOT_TOKEN_HERE" 
+TELEGRAM_CHAT_ID = "TELEGRAM_BOT_CHAT_ID HERE"
 
 def send_telegram_alert_async(payload, attacker_ip):
     """
